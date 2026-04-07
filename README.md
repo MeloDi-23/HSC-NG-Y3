@@ -10,3 +10,6 @@
 
 ## data
 data dir is supposed to be put in the root dir. I used a symbolic link to the actual dir.
+
+## other dirs
+there are lines saving data to maps results figs... some of them are unnecessary.
