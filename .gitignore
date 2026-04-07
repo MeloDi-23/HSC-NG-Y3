@@ -1,10 +1,10 @@
 **/__pycache__/
 **/.ipynb_checkpoints/
 **/.vscode/
-/data/
 /results/
 /maps/
 **/figs/
 /HSC_Y3_NG/
 *.sh
 *.pbs
+/data
