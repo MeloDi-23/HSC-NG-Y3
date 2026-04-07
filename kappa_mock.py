@@ -21,8 +21,8 @@ name_fields = ['XMM', 'VVDS','GAMA09H', 'GAMA15H', 'WIDE12H', 'HECTOMAP']
 number_patches= [8, 25, 23, 7, 26, 13] # of each corresponding field
 
 tomo_bin = [1, 2, 3, 4]         # tomo_bin, 0 is excluded.
-pixscale_deg = 0.5 / 60.0   # 0.5 arcmin → degrees/pixel
-
+pixscale_arcmin = 0.5   # 0.5 arcmin → degrees/pixel
+pixscale_deg = pixscale_arcmin / 60.0
 
 smoothing_kernel_size = 1   # arcmin
 
@@ -61,8 +61,6 @@ def statistics(field, realization, tomo):
     ra = dat_real['i_ra']
     dec = dat_real['i_dec']
     padding = 10  # pixels
-    pixscale_arcmin = 0.5   # 0.5 arcmin → degrees/pixel
-    pixscale_deg = pixscale_arcmin / 60.0
 
     w, (nx, ny) = map_utils.set_wcs_shape(ra, dec, pixscale_arcmin, padding)
 

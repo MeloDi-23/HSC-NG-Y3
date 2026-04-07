@@ -23,7 +23,8 @@ name_fields = ['XMM', 'VVDS','GAMA09H', 'GAMA15H', 'WIDE12H', 'HECTOMAP']
 number_patches= [8, 25,23,7,26,13] # of each corresponding field
 
 tomo_bin = [1, 2, 3, 4]         # tomo_bin, 0 is excluded.
-pixscale_deg = 0.5 / 60.0   # 0.5 arcmin → degrees/pixel
+pixscale_arcmin = 0.5   # 0.5 arcmin → degrees/pixel
+pixscale_deg = pixscale_arcmin / 60.0
 
 procedure_str = 'inpainting-smooth g-KSI-masking'
 smoothing_kernel_size = 1   # arcmin
@@ -107,25 +108,7 @@ def statistics(field, Npro=50):
     dec_center = 0.5 * (dec_min + dec_max)
     ra_center = 0.5 * (ra_min + ra_max)
     # --- Build WCS ---
-    w = WCS(naxis=2)
-
-    w.wcs.crpix = [0, 0]
-    # Set reference coordinates (center RA/Dec)
-    w.wcs.crval = [ra_center, dec_center]
-    # Set scale: CDELT is negative in RA to follow standard astro convention
-    w.wcs.cdelt = [-pixscale_deg, pixscale_deg]
-    # Use standard TAN projection
-    w.wcs.ctype = ["RA---TAN", "DEC--TAN"]
-    w.wcs.cunit = ['deg', 'deg']
-
-    pos = w.world_to_pixel(SkyCoord(ra=ra*u.deg, dec=dec*u.deg))
-    xx = pos[0]
-    yy = pos[1]
-    xmin, xmax, ymin, ymax = xx.min(), xx.max(), yy.min(), yy.max()
-    nx = int(xmax - xmin) + padding * 2
-    ny = int(ymax - ymin) + padding * 2
-
-    w.wcs.crpix = [-xmin + padding, -ymin + padding]
+    w, (nx, ny) = map_utils.set_wcs_shape(ra, dec, pixscale_arcmin, padding)
 
     print("Image size:", nx, "x", ny)
 

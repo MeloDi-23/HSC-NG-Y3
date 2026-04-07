@@ -108,7 +108,7 @@ def _build_mock_shear_catalog(dat_real, dat_mock):
     return e1_hat, e2_hat, weight_cat
 
 
-def statistics(field, realization, tomo):
+def statistics(field, realization, tomo, seed):
     print(f'Processing field: {field}, realization: {realization}, tomo: {tomo}')
     print('Loading data...')
 
@@ -181,9 +181,9 @@ def statistics(field, realization, tomo):
     rand_eb = np.empty((n_rand, eb.size))
 
     print('Computing power spectra for random rotations...')
-    np.random.seed(42)
+    rng = np.random.default_rng(seed)
     for i in range(n_rand):
-        angles = np.random.uniform(0.0, np.pi, size=e1_hat.shape)
+        angles = rng.uniform(0.0, np.pi, size=e1_hat.shape)
         cos2phi = np.cos(2.0 * angles)
         sin2phi = np.sin(2.0 * angles)
 
@@ -235,4 +235,8 @@ if __name__ == '__main__':
     stats_args = [
         (field, f'cone{i}', tomo) for i in range(1, 26) for tomo in tomo_bin    # 100 tasks
     ]
+
+    seeds = [seed.generate_state(1)[0] for seed in np.random.SeedSequence(42).spawn(len(stats_args))]
+    stats_args = [arg + (seed,) for arg, seed in zip(stats_args, seeds)]
+
     pool.starmap(statistics, stats_args, chunksize=1)

@@ -18,7 +18,9 @@ from hsc_y3_utils import map_utils
 name_fields = ['XMM', 'VVDS', 'GAMA09H', 'GAMA15H', 'WIDE12H', 'HECTOMAP']
 number_patches = [8, 25, 23, 7, 26, 13]
 tomo_bin = [1, 2, 3, 4]
-pixscale_deg = 0.5 / 60.0
+pixscale_arcmin = 0.5   # 0.5 arcmin → degrees/pixel
+pixscale_deg = pixscale_arcmin / 60.0
+
 smoothing_kernel_size = 1   # arcmin
 
 _RANDOM_ROTATION_STATE = {}
@@ -72,7 +74,6 @@ def _random_rotation_worker(seed):
         state['wsp'],
     )
 
-
 def statistics(field, tomo, npro=50):
     print(f'Processing field: {field}')
     print('Loading data...')
@@ -89,25 +90,7 @@ def statistics(field, tomo, npro=50):
     dec = dat['i_dec']
     padding = 10
 
-    ra_min, ra_max = ra.min(), ra.max()
-    dec_min, dec_max = dec.min(), dec.max()
-    dec_center = 0.5 * (dec_min + dec_max)
-    ra_center = 0.5 * (ra_min + ra_max)
-
-    w = WCS(naxis=2)
-    w.wcs.crpix = [0, 0]
-    w.wcs.crval = [ra_center, dec_center]
-    w.wcs.cdelt = [-pixscale_deg, pixscale_deg]
-    w.wcs.ctype = ['RA---TAN', 'DEC--TAN']
-    w.wcs.cunit = ['deg', 'deg']
-
-    pos = w.world_to_pixel(SkyCoord(ra=ra * u.deg, dec=dec * u.deg))
-    xx = pos[0]
-    yy = pos[1]
-    xmin, xmax, ymin, ymax = xx.min(), xx.max(), yy.min(), yy.max()
-    nx = int(xmax - xmin) + padding * 2
-    ny = int(ymax - ymin) + padding * 2
-    w.wcs.crpix = [-xmin + padding, -ymin + padding]
+    w, (nx, ny) = map_utils.set_wcs_shape(ra, dec, pixscale_arcmin, padding)
 
     print('Image size:', nx, 'x', ny)
     print('Creating shear maps...')
