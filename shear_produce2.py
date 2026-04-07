@@ -146,10 +146,10 @@ def statistics(field, tomo, npro=50):
     g1_map = flatgrid.smooth_G(g1_map, smoothing_pixels)
     g2_map = flatgrid.smooth_G(g2_map, smoothing_pixels)
 
-    print('Saving maps...')
-    map_utils.save_map(g1_map, w, f'maps/g1_map_{field}_smooth_g_z{tomo}')
-    map_utils.save_map(g2_map, w, f'maps/g2_map_{field}_smooth_g_z{tomo}')
-    map_utils.save_map(mask_z, w, f'maps/mask_{field}_smooth_g_z{tomo}')
+    # print('Saving maps...')
+    # map_utils.save_map(g1_map, w, f'maps/g1_map_{field}_smooth_g_z{tomo}')
+    # map_utils.save_map(g2_map, w, f'maps/g2_map_{field}_smooth_g_z{tomo}')
+    # map_utils.save_map(mask_z, w, f'maps/mask_{field}_smooth_g_z{tomo}')
 
     print('Computing power spectra...')
     size_rad_x = pixscale_deg / 180.0 * np.pi * nx

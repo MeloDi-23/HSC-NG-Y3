@@ -26,7 +26,6 @@ pixscale_deg = pixscale_arcmin / 60.0
 
 smoothing_kernel_size = 1   # arcmin
 
-
 _DATA_REAL = {}
 
 for field in name_fields:
@@ -37,7 +36,7 @@ for field in name_fields:
     dat_real = np.concatenate(dats_real)
     _DATA_REAL[field] = dat_real
 
-def statistics(field, realization, tomo):
+def statistics(field, realization, tomo, seed):
     print(f'Processing field: {field}')
 
     print('Loading data...')
@@ -157,7 +156,7 @@ def statistics(field, realization, tomo):
         procedure.append('smooth k')
 
     procedure_str = '-'.join(procedure)
-    np.random.seed(42)
+    rng = np.random.default_rng(seed)
 
     # pixelize shear map
     [g1_map, g2_map], [mask, nmap] = map_utils.create_shear_map(ra_cat, dec_cat, e1_hat, e2_hat, flatgrid, weights=weight_cat)
@@ -205,7 +204,7 @@ def statistics(field, realization, tomo):
     rand_EB = np.empty((n_rand, EB.size))
 
     for i in range(n_rand):
-        angles = np.random.uniform(0.0, np.pi, size=e1_hat.shape)
+        angles = rng.uniform(0.0, np.pi, size=e1_hat.shape)
         cos2phi = np.cos(2.0 * angles)
         sin2phi = np.sin(2.0 * angles)
 
@@ -259,4 +258,7 @@ if __name__ == "__main__":
     stats_args = [
         (field, f'cone{i}', tomo) for i in range(1, 26) for tomo in tomo_bin    # 100 tasks
     ]
+    seeds = [seed.generate_state(1)[0] for seed in np.random.SeedSequence(42).spawn(len(stats_args))]
+    stats_args = [arg + (seed,) for arg, seed in zip(stats_args, seeds)]
+
     pool.starmap(statistics, stats_args, chunksize=1)
