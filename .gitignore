@@ -6,4 +6,5 @@
 /maps/
 **/figs/
 /HSC_Y3_NG/
-
+**/*.sh
+**/*.pbs
