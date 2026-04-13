@@ -13,6 +13,10 @@ tomo_bin = [1, 2, 3, 4]
 pixscale_deg = 0.5 / 60.0
 smoothing_kernel_size = 1   # arcmin
 
+ell_min = 80
+ell_max = 6500
+n_bins = 20
+
 _DATA_REAL = {}
 
 for field in name_fields:
@@ -165,15 +169,16 @@ def statistics(field, realization, tomo, seed):
     print('Computing power spectra...')
     size_rad_x = pixscale_deg / 180.0 * np.pi * nx
     size_rad_y = pixscale_deg / 180.0 * np.pi * ny
-    ell_edges = np.unique(np.logspace(np.log10(80), np.log10(6500), 15))
+
+    ell_edges = np.unique(np.logspace(np.log10(ell_min), np.log10(ell_max), n_bins))
     bins = nmt.bins.NmtBinFlat(ell_edges[:-1], ell_edges[1:])
+    ls = bins.get_effective_ells()
 
     f0 = nmt.NmtFieldFlat(size_rad_x, size_rad_y, mask_z, [g1_map, -g2_map])
     wsp = nmt.NmtWorkspaceFlat()
     wsp.compute_coupling_matrix(f0, f0, bins)
 
     ee, bb, eb = _compute_spin2_power(g1_map, g2_map, mask_z, size_rad_x, size_rad_y, bins, wsp)
-    ls = ell_edges[:-1] + np.diff(ell_edges) / 2
 
     n_rand = 500
     rand_ee = np.empty((n_rand, ee.size))

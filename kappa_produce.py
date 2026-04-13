@@ -25,8 +25,11 @@ number_patches= [8, 25,23,7,26,13] # of each corresponding field
 tomo_bin = [1, 2, 3, 4]         # tomo_bin, 0 is excluded.
 pixscale_arcmin = 0.5   # 0.5 arcmin → degrees/pixel
 pixscale_deg = pixscale_arcmin / 60.0
-
 smoothing_kernel_size = 1   # arcmin
+
+ell_min = 80
+ell_max = 6500
+n_bins = 20
 
 _RANDOM_ROTATION_STATE = {}
 
@@ -194,16 +197,17 @@ def statistics(field, tomo, Npro=50):
     print('Computing power spectra...')
     size_rad_x = pixscale_deg / 180.0 * np.pi * nx
     size_rad_y = pixscale_deg / 180.0 * np.pi * ny
-    ell_edges = np.unique(np.logspace(np.log10(80), np.log10(6500),15))
-    bins = nmt.bins.NmtBinFlat(ell_edges[:-1], ell_edges[1:])
 
+    ell_edges = np.unique(np.logspace(np.log10(ell_min), np.log10(ell_max), n_bins))
+    bins = nmt.bins.NmtBinFlat(ell_edges[:-1], ell_edges[1:])
+    ls = bins.get_effective_ells()
+    
     # #Compute workspace, only run once when choosing the mask and bins
     f0 = nmt.NmtFieldFlat(size_rad_x, size_rad_y, mask_z, [kappa]) 
     wsp=nmt.NmtWorkspaceFlat()
     wsp.compute_coupling_matrix(f0,f0,bins)
 
     EE, BB, EB = stats_code.compute_ps_spin0_all_terms(kappa, kappa_i, mask.reshape(ny, nx), size_rad_x, size_rad_y, bins, wsp)
-    ls = ell_edges[:-1] + np.diff(ell_edges)/2
 
     N_rand = 100
     rand_EE = []
