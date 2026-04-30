@@ -2,10 +2,13 @@
 **/.ipynb_checkpoints/
 **/.vscode/
 /results/
+/results_legacy/
 /maps/
+/tmp/
 **/figs/
 /HSC_Y3_NG/
 *.sh
 *.pbs
+*.txt
 /data
 TODO.md

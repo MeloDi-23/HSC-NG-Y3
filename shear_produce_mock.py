@@ -158,8 +158,11 @@ def statistics(field, realization, tomo, seed):
     g2_map = flatgrid.transform_mapsize(g2_map)
 
     smoothing_pixels = smoothing_kernel_size / (pixscale_deg * 60)
-    g1_map = flatgrid.smooth_G(g1_map, smoothing_pixels)
-    g2_map = flatgrid.smooth_G(g2_map, smoothing_pixels)
+    # g1_map = flatgrid.smooth_G(g1_map, smoothing_pixels)
+    # g2_map = flatgrid.smooth_G(g2_map, smoothing_pixels)
+
+    g1_map = flatgrid.smooth_G_masked(g1_map, mask_z, smoothing_pixels)
+    g2_map = flatgrid.smooth_G_masked(g2_map, mask_z, smoothing_pixels)
 
     print('Saving maps...')
     # map_utils.save_map(g1_map, w, f'maps/g1_map_{field}_{realization}_smooth_g_z{tomo}')
@@ -208,8 +211,11 @@ def statistics(field, realization, tomo, seed):
         g1_map_r = flatgrid.transform_mapsize(g1_map_r)
         g2_map_r = flatgrid.transform_mapsize(g2_map_r)
 
-        g1_map_r = flatgrid.smooth_G(g1_map_r, smoothing_pixels)
-        g2_map_r = flatgrid.smooth_G(g2_map_r, smoothing_pixels)
+        # g1_map_r = flatgrid.smooth_G(g1_map_r, smoothing_pixels)
+        # g2_map_r = flatgrid.smooth_G(g2_map_r, smoothing_pixels)
+
+        g1_map_r = flatgrid.smooth_G_masked(g1_map_r, mask_z_r, smoothing_pixels)
+        g2_map_r = flatgrid.smooth_G_masked(g2_map_r, mask_z_r, smoothing_pixels)
 
         rand_ee[i], rand_bb[i], rand_eb[i] = _compute_spin2_power(
             g1_map_r,
@@ -229,7 +235,8 @@ def statistics(field, realization, tomo, seed):
     eb_std = rand_eb.std(axis=0)
 
     np.savetxt(
-        f'results/Cl_results_{field}_{realization}_smooth_g_z{tomo}_negg2.txt',
+        # f'results/Cl_results_{field}_{realization}_smooth_g_z{tomo}_negg2.txt',
+        f'results/Cl_results_shear_{field}_{realization}_z{tomo}_negg2_masked_smooth.txt',
         np.vstack([ls, ee, eb, bb, ee_rm, ee_std, eb_rm, eb_std, bb_rm, bb_std]).T,
     )
 

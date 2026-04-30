@@ -66,8 +66,12 @@ def _random_rotation_worker(seed):
     smoothing_pixels = state['smoothing_kernel_size'] / (pixscale_deg * 60)
 
     if state['smooth_g']:
-        g1_map_r = state['flatgrid'].smooth_G(g1_map_r, smoothing_pixels)      # smoothed g1 map, 2d
-        g2_map_r = state['flatgrid'].smooth_G(g2_map_r, smoothing_pixels)
+        g1_map_r = state['flatgrid'].smooth_G_masked(g1_map_r, mask_z_r, smoothing_pixels)      # smoothed g1 map, 2d
+        g2_map_r = state['flatgrid'].smooth_G_masked(g2_map_r, mask_z_r, smoothing_pixels)
+
+        # g1_map_r = state['flatgrid'].smooth_G(g1_map_r, smoothing_pixels)      # smoothed g1 map, 2d
+        # g2_map_r = state['flatgrid'].smooth_G(g2_map_r, smoothing_pixels)
+
     if state['inpainting']:
     # Inpainting
         g1_map_r = map_utils.inpaint(g1_map_r*mask_z_r, mask_z_r, niter=100, thresholding='hard')
@@ -78,8 +82,10 @@ def _random_rotation_worker(seed):
     kappa_i_r *= mask_z_r
 
     if state['smooth_k']:
-        kappa_r = state['flatgrid'].smooth_G(kappa_r, smoothing_pixels)          # E mode
-        kappa_i_r = state['flatgrid'].smooth_G(kappa_i_r, smoothing_pixels)      # B mode
+        kappa_r = state['flatgrid'].smooth_G_masked(kappa_r, mask_z_r, smoothing_pixels)          # E mode
+        kappa_i_r = state['flatgrid'].smooth_G_masked(kappa_i_r, mask_z_r, smoothing_pixels)      # B mode
+        # kappa_r = state['flatgrid'].smooth_G(kappa_r, smoothing_pixels)          # E mode
+        # kappa_i_r = state['flatgrid'].smooth_G(kappa_i_r, smoothing_pixels)      # B mode
 
     return stats_code.compute_ps_spin0_all_terms(
         kappa_r,
@@ -92,7 +98,7 @@ def _random_rotation_worker(seed):
     )
 
 
-def statistics(field, tomo, Npro=50):
+def statistics(field, tomo, Npro=1):
     print(f'Processing field: {field}')
 
     print('Loading data...')
@@ -167,13 +173,15 @@ def statistics(field, tomo, Npro=50):
     g1_map = flatgrid.transform_mapsize(g1_map)
     g2_map = flatgrid.transform_mapsize(g2_map)
 
-    smoothing_pixels = smoothing_kernel_size / (pixscale_deg * 60)
+    smoothing_pixels = smoothing_kernel_size / (pixscale_deg * 60)          # should be 2 here.
 
     # smoothing
     if smooth_g:
-        g1_map = flatgrid.smooth_G(g1_map, smoothing_pixels)      # smoothed g1 map, 2d
-        g2_map = flatgrid.smooth_G(g2_map, smoothing_pixels)
-    if inpainting:
+        g1_map = flatgrid.smooth_G_masked(g1_map, mask_z, smoothing_pixels)      # smoothed g1 map, 2d
+        g2_map = flatgrid.smooth_G_masked(g2_map, mask_z, smoothing_pixels)
+        # g1_map = flatgrid.smooth_G(g1_map, smoothing_pixels)      # smoothed g1 map, 2d
+        # g2_map = flatgrid.smooth_G(g2_map, smoothing_pixels)
+    if inpainting:      # maybe consider moving inpainting to the front, and then do smoothing
     # Inpainting
         g1_map = map_utils.inpaint(g1_map*mask_z, mask_z, niter=100, thresholding='hard')
         g2_map = map_utils.inpaint(g2_map*mask_z, mask_z, niter=100, thresholding='hard')
@@ -186,8 +194,10 @@ def statistics(field, tomo, Npro=50):
     kappa_i *= mask_z
 
     if smooth_k:
-        kappa = flatgrid.smooth_G(kappa, smoothing_pixels)          # E mode
-        kappa_i = flatgrid.smooth_G(kappa_i, smoothing_pixels)      # B mode
+        kappa = flatgrid.smooth_G_masked(kappa, mask_z, smoothing_pixels)          # E mode
+        kappa_i = flatgrid.smooth_G_masked(kappa_i, mask_z, smoothing_pixels)      # B mode
+        # kappa = flatgrid.smooth_G(kappa, smoothing_pixels)          # E mode
+        # kappa_i = flatgrid.smooth_G(kappa_i, smoothing_pixels)      # B mode
 
     print('Saving maps...')
     map_utils.save_map(kappa, w, f'maps/kappa_map_{field}_{procedure_str}')
@@ -209,7 +219,7 @@ def statistics(field, tomo, Npro=50):
 
     EE, BB, EB = stats_code.compute_ps_spin0_all_terms(kappa, kappa_i, mask.reshape(ny, nx), size_rad_x, size_rad_y, bins, wsp)
 
-    N_rand = 100
+    N_rand = 1000
     rand_EE = []
     rand_BB = []
     rand_EB = []
@@ -240,49 +250,19 @@ def statistics(field, tomo, Npro=50):
 
     ctx = mp.get_context('fork')
     # nproc = min(mp.cpu_count() or 1, N_rand)
-    with ctx.Pool(processes=Npro, initializer=_init_random_rotation_pool, initargs=(pool_state,)) as pool:
-        for EE_r, BB_r, EB_r in tqdm.tqdm(pool.imap(_random_rotation_worker, seeds, chunksize=8), total=N_rand):
+    if Npro > 1:
+        with ctx.Pool(processes=Npro, initializer=_init_random_rotation_pool, initargs=(pool_state,)) as pool:
+            for EE_r, BB_r, EB_r in tqdm.tqdm(pool.imap(_random_rotation_worker, seeds, chunksize=8), total=N_rand):
+                rand_EE.append(EE_r)
+                rand_BB.append(BB_r)
+                rand_EB.append(EB_r)
+    else:
+        _init_random_rotation_pool(pool_state)
+        for seed in seeds:
+            EE_r, BB_r, EB_r = _random_rotation_worker(seed)
             rand_EE.append(EE_r)
             rand_BB.append(BB_r)
             rand_EB.append(EB_r)
-
-    # for i in tqdm.trange(N_rand):
-    #     shear_random = map_utils.random_rotation(e1_hat, e2_hat)        # random rotate the shear.
-
-    #     # weighted averaged shear map
-    #     [g1_map_r, g2_map_r], [mask, nmap] = map_utils.create_shear_map(ra_cat,dec_cat, *shear_random, flatgrid, weights= weight_cat)
-
-    #     # questions here: the mask shows whether there is galaxy, but we dont use the weight map afterwards.
-
-    #     mask_z = flatgrid.transform_mapsize(mask)
-    #     g1_map_r = flatgrid.transform_mapsize(g1_map_r)
-    #     g2_map_r = flatgrid.transform_mapsize(g2_map_r)
-
-    #     smoothing_pixels = smoothing_kernel_size / (pixscale_deg * 60)
-
-    #     if smooth_g:
-    #         g1_map_r = flatgrid.smooth_G(g1_map_r, smoothing_pixels)      # smoothed g1 map, 2d
-    #         g2_map_r = flatgrid.smooth_G(g2_map_r, smoothing_pixels)
-    #     if inpainting:
-    #     # Inpainting
-    #         g1_map_r = map_utils.inpaint(g1_map_r*mask_z, mask_z, niter=100, thresholding='hard')
-    #         g2_map_r = map_utils.inpaint(g2_map_r*mask_z, mask_z, niter=100, thresholding='hard')  # what if we subs mask with weight map?
-
-    #     kappa_r, kappa_i_r= map_utils.KS_map(g1_map_r, g2_map_r)
-    #     kappa_r *= mask_z
-    #     kappa_i_r *= mask_z
-
-    #     if smooth_k:
-    #         kappa_r = flatgrid.smooth_G((kappa_r * mask_z).flatten(), smoothing_kernel_size)          # E mode
-    #         kappa_i_r = flatgrid.smooth_G((kappa_i_r * mask_z).flatten(), smoothing_kernel_size)      # B mode
-
-    #     # work space calculation is done before hand.
-
-    #     EE_r, BB_r, EB_r = stats_code.compute_ps_spin0_all_terms(kappa_r, kappa_i_r, mask.reshape(ny, nx), size_rad_x, size_rad_y, bins, wsp)
-
-    #     rand_EE.append(EE_r)
-    #     rand_BB.append(BB_r)
-    #     rand_EB.append(EB_r)
 
     rand_EE = np.array(rand_EE)
     rand_BB = np.array(rand_BB)
@@ -295,53 +275,23 @@ def statistics(field, tomo, Npro=50):
     EB_rm = rand_EB.mean(axis=0)
     EB_std = rand_EB.std(axis=0)
 
-    # print('Plotting results...')
-
-    # fig, axs = plt.subplots(1, 3, figsize=(13, 4), sharey=True)
-
-    # fig.suptitle(f'Field: {field}, {procedure_str}')
-    # # original
-    # axs[0].plot(ls, EE, '-', label='EE')
-    # axs[0].plot(ls, EB, '-', label='EB')
-    # axs[0].plot(ls, BB, '-', label='BB')
-    # axs[0].hlines(0, ls.min(), ls.max(), colors='k', linestyles='--')
-    # axs[0].set_title('Original')
-    # axs[0].legend()
-    # axs[0].set_xlabel('ell')
-    # axs[0].set_ylabel('C_ell')
-    # axs[0].semilogx()
-
-    # # random
-    # axs[1].errorbar(ls, EE_rm, EE_std, label='EE r')
-    # axs[1].errorbar(ls, EB_rm, EB_std, label='EB r')
-    # axs[1].errorbar(ls, BB_rm, BB_std, label='BB r')
-    # axs[1].hlines(0, ls.min(), ls.max(), colors='k', linestyles='--')
-    # axs[1].set_title('Random rotation')
-    # axs[1].legend()
-    # axs[1].set_xlabel('ell')
-    # axs[1].semilogx()
-
-    # # subtracted
-    # axs[2].plot(ls, EE - EE_rm, '-', label='EE - EE_r')
-    # axs[2].plot(ls, EB - EB_rm, '-', label='EB - EB_r')
-    # axs[2].plot(ls, BB - BB_rm, '-', label='BB - BB_r')
-    # axs[2].hlines(0, ls.min(), ls.max(), colors='k', linestyles='--')
-    # axs[2].set_title('Difference (orig - random)')
-    # axs[2].legend()
-    # axs[2].set_xlabel('ell')
-    # # axs[2].set_ylim(-2e-9, 3.5e-9)
-    # axs[2].semilogx()
-
-    # plt.tight_layout()
-    # plt.savefig(f'figs/All_Cll_{field}_{procedure_str}_z{tomo}.pdf')
-
-    np.savetxt(f'results/Cl_results_{field}_{procedure_str}_z{tomo}.txt', np.vstack([ls, EE, EB, BB, EE_rm, EE_std, EB_rm, EB_std, BB_rm, BB_std]).T,)
+    np.savetxt(f'results/Cl_results_{field}_{procedure_str}_z{tomo}.txt', np.vstack([ls, EE, EB, BB, EE_rm, EE_std, EB_rm, EB_std, BB_rm, BB_std]).T)
 
 if __name__ == "__main__":
-    smooth_g = False
+    smooth_g = True
     inpainting = True
-    smooth_k = True
+    smooth_k = False
     import sys
     field = sys.argv[1]
-    for tomo in tomo_bin:
-        statistics(field, tomo)
+
+    # either parallel on random rotation or parallel on tomo bin.
+    # I am not sure which one is faster.
+    # usually the work space computation is expensive.
+    # if you do inpainting maybe random rotation is more expensive.
+    def stat(tomo):
+        statistics(field, tomo, Npro=1)
+    with mp.Pool(processes=4) as pool:
+        pool.map(stat, tomo_bin)
+
+    # for tomo in tomo_bin:
+    #     statistics(field, tomo, Npro=50)

@@ -485,6 +485,22 @@ class FlatClass(object):
         smooth_image = filters.gaussian_filter(img, smoothing_scale_pixel)
         return smooth_image
     
+    def smooth_G_masked(self, mapa, mask, smoothing_scale_pixel):
+        """
+        Smooth 2D map (passed as a flattened array) with a mask
+        """
+        img = mapa.reshape([self.ny, self.nx]).astype(float)
+        mask_2d = mask.reshape([self.ny, self.nx]).astype(float)
+
+        num = filters.gaussian_filter(img * mask_2d, smoothing_scale_pixel)
+        den = filters.gaussian_filter(mask_2d, smoothing_scale_pixel)
+
+        out = np.zeros_like(num)
+        good = (den > 0) & (mask_2d.astype(bool))           # only preserve the un masked areas.
+        out[good] = num[good] / den[good]
+
+        return out
+
     def smooth_G_resized(self, mapa, kernel):
         """
         Smooth 2D map (passed as a flattened array)

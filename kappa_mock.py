@@ -172,8 +172,10 @@ def statistics(field, realization, tomo, seed):
 
     # smoothing
     if smooth_g:
-        g1_map = flatgrid.smooth_G(g1_map, smoothing_pixels)      # smoothed g1 map, 2d
-        g2_map = flatgrid.smooth_G(g2_map, smoothing_pixels)
+        g1_map = flatgrid.smooth_G_masked(g1_map, mask_z, smoothing_pixels)      # smoothed g1 map, 2d
+        g2_map = flatgrid.smooth_G_masked(g2_map, mask_z, smoothing_pixels)
+        # g1_map = flatgrid.smooth_G(g1_map, smoothing_pixels)      # smoothed g1 map, 2d
+        # g2_map = flatgrid.smooth_G(g2_map, smoothing_pixels)
     if inpainting:
     # Inpainting
         g1_map = map_utils.inpaint(g1_map*mask_z, mask_z, niter=100, thresholding='hard')
@@ -185,8 +187,10 @@ def statistics(field, realization, tomo, seed):
     kappa_i *= mask_z
     # kappa smoothing
     if smooth_k:
-        kappa = flatgrid.smooth_G(kappa.flatten(), smoothing_pixels)          # E mode
-        kappa_i = flatgrid.smooth_G(kappa_i.flatten(), smoothing_pixels)      # B mode
+        kappa = flatgrid.smooth_G_masked(kappa, mask_z, smoothing_pixels)          # E mode
+        kappa_i = flatgrid.smooth_G_masked(kappa_i, mask_z, smoothing_pixels)      # B mode
+        # kappa = flatgrid.smooth_G(kappa.flatten(), smoothing_pixels)          # E mode
+        # kappa_i = flatgrid.smooth_G(kappa_i.flatten(), smoothing_pixels)      # B mode
     print('Computing power spectra...')
     size_rad_x = pixscale_deg / 180.0 * np.pi * nx
     size_rad_y = pixscale_deg / 180.0 * np.pi * ny
@@ -221,8 +225,10 @@ def statistics(field, realization, tomo, seed):
         g2_map_r = flatgrid.transform_mapsize(g2_map_r)
 
         if smooth_g:
-            g1_map_r = flatgrid.smooth_G(g1_map_r, smoothing_pixels)
-            g2_map_r = flatgrid.smooth_G(g2_map_r, smoothing_pixels)
+            # g1_map_r = flatgrid.smooth_G(g1_map_r, smoothing_pixels)
+            # g2_map_r = flatgrid.smooth_G(g2_map_r, smoothing_pixels)
+            g1_map_r = flatgrid.smooth_G_masked(g1_map_r, mask_z, smoothing_pixels)      # smoothed g1 map, 2d
+            g2_map_r = flatgrid.smooth_G_masked(g2_map_r, mask_z, smoothing_pixels)
         if inpainting:
             g1_map_r = map_utils.inpaint(g1_map_r * mask_z, mask_z, niter=100, thresholding='hard')
             g2_map_r = map_utils.inpaint(g2_map_r * mask_z, mask_z, niter=100, thresholding='hard')
@@ -232,8 +238,10 @@ def statistics(field, realization, tomo, seed):
         kappa_i_r *= mask_z
 
         if smooth_k:
-            kappa_r = flatgrid.smooth_G(kappa_r.flatten(), smoothing_pixels)
-            kappa_i_r = flatgrid.smooth_G(kappa_i_r.flatten(), smoothing_pixels)
+            kappa_r = flatgrid.smooth_G_masked(kappa_r, mask_z, smoothing_pixels)          # E mode
+            kappa_i_r = flatgrid.smooth_G_masked(kappa_i_r, mask_z, smoothing_pixels)      # B mode
+            # kappa_r = flatgrid.smooth_G(kappa_r, smoothing_pixels)
+            # kappa_i_r = flatgrid.smooth_G(kappa_i_r, smoothing_pixels)
 
         rand_EE[i], rand_BB[i], rand_EB[i] = stats_code.compute_ps_spin0_all_terms(
             kappa_r, kappa_i_r, mask.reshape(ny, nx), size_rad_x, size_rad_y, bins, wsp
@@ -252,7 +260,7 @@ def statistics(field, realization, tomo, seed):
     )
 
 if __name__ == "__main__":
-    smooth_g = True
+    smooth_g = False
     inpainting = False
     smooth_k = False
     pool = Pool(processes=50)  # Adjust the number of processes as needed

@@ -14,13 +14,12 @@ from hsc_y3_utils import map_utils
 
 # use -g2 in power spectrum calculation.
 
-
 name_fields = ['XMM', 'VVDS', 'GAMA09H', 'GAMA15H', 'WIDE12H', 'HECTOMAP']
 number_patches = [8, 25, 23, 7, 26, 13]
 tomo_bin = [1, 2, 3, 4]
 pixscale_arcmin = 0.5   # 0.5 arcmin → degrees/pixel
 pixscale_deg = pixscale_arcmin / 60.0
-smoothing_kernel_size = 1   # arcmin
+smoothing_kernel_size = 3   # arcmin
 
 ell_min = 80
 ell_max = 6500
@@ -64,8 +63,12 @@ def _random_rotation_worker(seed):
     g1_map_r = state['flatgrid'].transform_mapsize(g1_map_r)
     g2_map_r = state['flatgrid'].transform_mapsize(g2_map_r)
 
-    g1_map_r = state['flatgrid'].smooth_G(g1_map_r, state['smoothing_pixels'])
-    g2_map_r = state['flatgrid'].smooth_G(g2_map_r, state['smoothing_pixels'])
+
+    # g1_map_r = state['flatgrid'].smooth_G(g1_map_r, state['smoothing_pixels'])
+    # g2_map_r = state['flatgrid'].smooth_G(g2_map_r, state['smoothing_pixels'])
+
+    g1_map_r = state['flatgrid'].smooth_G_masked(g1_map_r, mask_z_r, state['smoothing_pixels'])
+    g2_map_r = state['flatgrid'].smooth_G_masked(g2_map_r, mask_z_r, state['smoothing_pixels'])
 
     return _compute_spin2_power(
         g1_map_r,
@@ -77,7 +80,7 @@ def _random_rotation_worker(seed):
         state['wsp'],
     )
 
-def statistics(field, tomo, npro=50):
+def statistics(field, tomo, npro=1):
     print(f'Processing field: {field}')
     print('Loading data...')
 
@@ -146,8 +149,12 @@ def statistics(field, tomo, npro=50):
     g2_map = flatgrid.transform_mapsize(g2_map)
 
     smoothing_pixels = smoothing_kernel_size / (pixscale_deg * 60)
-    g1_map = flatgrid.smooth_G(g1_map, smoothing_pixels)
-    g2_map = flatgrid.smooth_G(g2_map, smoothing_pixels)
+
+    # g1_map = flatgrid.smooth_G(g1_map, smoothing_pixels)
+    # g2_map = flatgrid.smooth_G(g2_map, smoothing_pixels)
+    g1_map = flatgrid.smooth_G_masked(g1_map, mask_z, smoothing_pixels)
+    g2_map = flatgrid.smooth_G_masked(g2_map, mask_z, smoothing_pixels)
+
 
     # print('Saving maps...')
     # map_utils.save_map(g1_map, w, f'maps/g1_map_{field}_smooth_g_z{tomo}')
@@ -188,12 +195,55 @@ def statistics(field, tomo, npro=50):
         'wsp': wsp,
     }
 
-    ctx = mp.get_context('fork')
-    with ctx.Pool(processes=npro, initializer=_init_random_rotation_pool, initargs=(pool_state,)) as pool:
-        for ee_r, bb_r, eb_r in tqdm.tqdm(pool.imap(_random_rotation_worker, seeds, chunksize=8), total=n_rand):
+
+    if npro > 1:
+        ctx = mp.get_context('fork')
+        with ctx.Pool(processes=npro, initializer=_init_random_rotation_pool, initargs=(pool_state,)) as pool:
+            for ee_r, bb_r, eb_r in tqdm.tqdm(pool.imap(_random_rotation_worker, seeds, chunksize=8), total=n_rand):
+                rand_ee.append(ee_r)
+                rand_bb.append(bb_r)
+                rand_eb.append(eb_r)
+    else:
+        for s in seeds:
+            rng = np.random.default_rng(s)
+            state = pool_state
+
+            angles = rng.uniform(0.0, np.pi, size=state['e1_hat'].shape)
+            cos2phi = np.cos(2.0 * angles)
+            sin2phi = np.sin(2.0 * angles)
+
+            e1_rot = state['e1_hat'] * cos2phi - state['e2_hat'] * sin2phi
+            e2_rot = state['e1_hat'] * sin2phi + state['e2_hat'] * cos2phi
+
+            [g1_map_r, g2_map_r], [mask_r, _] = map_utils.create_shear_map(
+                state['ra_cat'],
+                state['dec_cat'],
+                e1_rot,
+                e2_rot,
+                state['flatgrid'],
+                weights=state['weight_cat'],
+            )
+
+            mask_z_r = state['flatgrid'].transform_mapsize(mask_r)
+            g1_map_r = state['flatgrid'].transform_mapsize(g1_map_r)
+            g2_map_r = state['flatgrid'].transform_mapsize(g2_map_r)
+
+            g1_map_r = state['flatgrid'].smooth_G_masked(g1_map_r, mask_z_r, state['smoothing_pixels'])
+            g2_map_r = state['flatgrid'].smooth_G_masked(g2_map_r, mask_z_r, state['smoothing_pixels'])
+
+            ee_r, bb_r, eb_r = _compute_spin2_power(
+                g1_map_r,
+                g2_map_r,
+                mask_z_r,
+                state['size_rad_x'],
+                state['size_rad_y'],
+                state['bins'],
+                state['wsp'],
+            )
             rand_ee.append(ee_r)
             rand_bb.append(bb_r)
             rand_eb.append(eb_r)
+
 
     rand_ee = np.array(rand_ee)
     rand_bb = np.array(rand_bb)
@@ -206,14 +256,25 @@ def statistics(field, tomo, npro=50):
     eb_rm = rand_eb.mean(axis=0)
     eb_std = rand_eb.std(axis=0)
 
+    if smoothing_kernel_size > 0:
+        file_name = f"results/Cl_results_shear_{field}_z{tomo_bin}_negg2_masked_smooth_{smoothing_kernel_size}.txt"
+    else:
+        file_name = f"results/Cl_results_shear_{field}_z{tomo_bin}_negg2_masked_unsmooth.txt"
     np.savetxt(
-        f'results/Cl_results_{field}_smooth_g_z{tomo}_negg2_cmp.txt',
+        file_name,
         np.vstack([ls, ee, eb, bb, ee_rm, ee_std, eb_rm, eb_std, bb_rm, bb_std]).T,
     )
 
-
 import sys
+from functools import partial
 if __name__ == '__main__':
     field = sys.argv[1]
-    for tomo in [1, 2, 3, 4]:
-        statistics(field, tomo)
+    ctx = mp.get_context('fork')
+    tomos = [1, 2, 3, 4]
+    def statistics_wrapper(tomo):
+        statistics(field, tomo, npro=1)
+    with ctx.Pool(processes=4) as pool:
+        pool.map(statistics_wrapper, tomos)
+    # for tomo in [1, 2, 3, 4]:
+    #     statistics(field, tomo)
+    
