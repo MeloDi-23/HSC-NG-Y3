@@ -199,11 +199,6 @@ def statistics(field, tomo, Npro=1):
         # kappa = flatgrid.smooth_G(kappa, smoothing_pixels)          # E mode
         # kappa_i = flatgrid.smooth_G(kappa_i, smoothing_pixels)      # B mode
 
-    print('Saving maps...')
-    map_utils.save_map(kappa, w, f'maps/kappa_map_{field}_{procedure_str}')
-    map_utils.save_map(kappa_i, w, f'maps/kappaB_map_{field}_{procedure_str}')
-    map_utils.save_map(mask_z, w, f'maps/mask_{field}_{procedure_str}')
-
     print('Computing power spectra...')
     size_rad_x = pixscale_deg / 180.0 * np.pi * nx
     size_rad_y = pixscale_deg / 180.0 * np.pi * ny
@@ -278,10 +273,12 @@ def statistics(field, tomo, Npro=1):
     np.savetxt(f'results/Cl_results_{field}_{procedure_str}_z{tomo}.txt', np.vstack([ls, EE, EB, BB, EE_rm, EE_std, EB_rm, EB_std, BB_rm, BB_std]).T)
 
 if __name__ == "__main__":
+    import sys
+
     smooth_g = True
     inpainting = True
     smooth_k = False
-    import sys
+
     field = sys.argv[1]
 
     # either parallel on random rotation or parallel on tomo bin.

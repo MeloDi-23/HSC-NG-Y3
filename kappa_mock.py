@@ -260,10 +260,10 @@ def statistics(field, realization, tomo, seed):
     )
 
 if __name__ == "__main__":
-    smooth_g = False
-    inpainting = False
-    smooth_k = False
-    pool = Pool(processes=50)  # Adjust the number of processes as needed
+    smooth_g = True
+    inpainting = True
+    smooth_k = True
+    pool = Pool(processes=20)  # Adjust the number of processes as needed
     import sys
     field = sys.argv[1]
     stats_args = [
