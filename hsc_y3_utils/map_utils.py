@@ -707,7 +707,7 @@ def create_components_calibmaplevel_data(ra, dec, e1, e2, erms, mtot,c1,c2, flat
     return shear_maps, masks_dens
 
 
-def create_shear_map(ra, dec, g1, g2, flat_obj, weights=None):
+def create_shear_map(ra, dec, g1, g2, flat_obj, weights=None, return_weightsmap=False):
     """
     Creates two maps containing the weighted average of the g1, g2 components (spin-2).
     Parameters
@@ -763,7 +763,10 @@ def create_shear_map(ra, dec, g1, g2, flat_obj, weights=None):
     shear_maps = [g1_map, g2_map]
     masks_dens = [mask, nmap]
 
-    return shear_maps, masks_dens
+    if return_weightsmap:
+        return shear_maps, masks_dens, weightsmap
+    else:
+        return shear_maps, masks_dens
 
 
 def make_mask_based_density(nmap = None):
@@ -1489,7 +1492,15 @@ def set_wcs_shape(ra,dec, reso, pad=1):
     w = wcs.WCS(naxis=2)
     w.wcs.cdelt = [-reso/60., reso/60.]
     w.wcs.ctype = ["RA---TAN", "DEC--TAN"]
-    crvalX = (np.max(ra) + np.min(ra))/2
+    # crvalX = (np.max(ra) + np.min(ra))/2
+    ra_radians = np.deg2rad(ra)
+    crvalX = np.rad2deg(
+        np.arctan2(
+            np.mean(np.sin(ra_radians)),
+            np.mean(np.cos(ra_radians)),
+        )
+    ) % 360.0
+
     crvalY = (np.max(dec) + np.min(dec))/2
     w.wcs.crval = [crvalX, crvalY]
 

@@ -8,7 +8,12 @@
 **/figs/
 /HSC_Y3_NG/
 *.sh
+*.npy
+*.npz
 *.pbs
 *.txt
+*.fits
+*.h5
+*.pkl
 /data
 TODO.md

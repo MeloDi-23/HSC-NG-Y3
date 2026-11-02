@@ -1,0 +1,34 @@
+paths:
+  source_nz_pattern: /home/hedi/HSCNG/data/source_nz/HSCY3_source_nz_bin{tomo}.txt
+  output_dir: /tmp/glass_hsc_lf_gabriela_smoke
+
+template:
+  mode: gabriela
+  hsc_real_pattern: /home/hedi/HSCNG/maps/real/kappa_map_{field}_z{tomo}_smooth g-inpainting-KSI-masking.fits
+  gabriela_mask_pattern: /lustre/work/gmarques/HSC_Y3_analysis_Gabriela/cosmo_varied/model{model_number}/mask_{field}_z{tomo}.fits
+  gabriela_map_pattern: /lustre/work/gmarques/HSC_Y3_analysis_Gabriela/cosmo_varied/model{model_number}/E_{field}smoothed_z{tomo}_{realization}.fits
+  cosmo_number: 0
+  realization: 0
+
+simulation:
+  nside: 16
+  lmax: 32
+  zmin: 0.0
+  zmax: 4.0
+  shell_width_mpc: 1000.0
+  correlated_shells: 3
+  nonlinear: false
+  smoothing_fwhm_arcmin: 0.0
+  save_fullsky: true
+  save_cutouts: true
+  fields: [XMM]
+  tomographic_bins: [1]
+
+cosmology_defaults:
+  Omega_b: 0.049
+  h: 0.6737
+  ns: 0.965
+  mnu: 0.06
+  tau: 0.054
+  w0: -1.0
+  wa: 0.0

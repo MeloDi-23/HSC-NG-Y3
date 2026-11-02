@@ -1,0 +1,42 @@
+paths:
+  source_nz_pattern: /home/hedi/HSCNG/data/source_nz/HSCY3_source_nz_bin{tomo}.txt
+  output_dir: /home/hedi/HSCNG/SBI/glass_hsc_lf/glass_di_4096
+
+template:
+  # "hsc_real" uses the multi-extension map; "gabriela" uses the two
+  # primary-image FITS patterns below.
+  mode: hsc_real
+  hsc_real_pattern: /home/hedi/HSCNG/maps/real/kappa_map_{field}_z{tomo}_smooth g-inpainting-KSI-masking.fits    # produced by DI
+  # gabriela_mask_pattern: /lustre/work/gmarques/HSC_Y3_analysis_Gabriela/cosmo_varied/model{model_number}/mask_{field}_z{tomo}.fits
+  # gabriela_map_pattern: /lustre/work/gmarques/HSC_Y3_analysis_Gabriela/cosmo_varied/model{model_number}/E_{field}smoothed_z{tomo}_{realization}.fits
+  # cosmo_number is zero-based, matching the existing analysis scripts.
+  # The path uses model_number = cosmo_number + 1.
+  cosmo_number: 0
+  realization: 0
+
+simulation:
+  nside: 4096
+  lmax: 6500
+  zmin: 0.0
+  zmax: 4.0
+  shell_width_mpc: 200.0
+  correlated_shells: 3
+  nonlinear: true
+  smoothing_fwhm_arcmin: 2.355      # sigma = 1.0 arcmin
+  save_fullsky: true
+  save_cutouts: true
+  fields: [XMM, VVDS, GAMA09H, GAMA15H, WIDE12H, HECTOMAP]
+  tomographic_bins: [1, 2, 3, 4]
+
+# Optional pixel-level approximation to HSC shape noise. Run
+# add_shape_noise.py on signal-only cutouts after generate_glass_hsc.py.
+
+# Values not supplied in a cosmology CSV row fall back to these defaults.
+cosmology_defaults:
+  Omega_b: 0.049
+  h: 0.6737
+  ns: 0.965
+  mnu: 0.06
+  tau: 0.054
+  w0: -1.0
+  wa: 0.0

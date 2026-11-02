@@ -1,0 +1,281 @@
+{
+  "cosmology": {
+    "cosmology_id": "fiducial",
+    "Omega_m": 0.31315,
+    "S8": 0.83954,
+    "h": 0.6737,
+    "Omega_b": 0.049,
+    "ns": 0.965,
+    "mnu": 0.06,
+    "tau": 0.054,
+    "w0": -1.0,
+    "wa": 0.0
+  },
+  "derived_sigma8": 0.821723698742396,
+  "realization": 0,
+  "seed": 41000,
+  "simulation": {
+    "nside": 1024,
+    "lmax": 2000,
+    "zmin": 0.0,
+    "zmax": 4.0,
+    "shell_width_mpc": 200.0,
+    "correlated_shells": 3,
+    "nonlinear": true,
+    "smoothing_fwhm_arcmin": 5.4,
+    "save_fullsky": true,
+    "save_cutouts": true,
+    "fields": [
+      "XMM",
+      "VVDS",
+      "GAMA09H",
+      "GAMA15H",
+      "WIDE12H",
+      "HECTOMAP"
+    ],
+    "tomographic_bins": [
+      1,
+      2,
+      3,
+      4
+    ]
+  },
+  "versions": {
+    "python": "3.12.15",
+    "numpy": "2.2.6",
+    "astropy": "7.1.1",
+    "healpy": "1.20.1",
+    "camb": "2.0.5",
+    "glass": "2026.4"
+  },
+  "source_nz_sha256": {
+    "1": "b72ad9f725db3de1e70bad73f5e1e12bddc2a716516014d1ef64c2e5c315acee",
+    "2": "699bdc0ad9779529e5447e2954f57173a60445c7a729b9d96adbd5b89e7bb652",
+    "3": "c2e670f1d1164047cf3d51ef188acc62bc4bfe3583e59d00ce004117a0bcc136",
+    "4": "9aab492b7904ae23c1dbe9ef35811bd3c3a3b19ac26a7ecae210eb1bb91029c2"
+  },
+  "templates": {
+    "XMM_z1": {
+      "mode": "gabriela",
+      "geometry_file": "/lustre/work/gmarques/HSC_Y3_analysis_Gabriela/cosmo_varied/model1/E_XMMsmoothed_z1_0.fits",
+      "mask_file": "/lustre/work/gmarques/HSC_Y3_analysis_Gabriela/cosmo_varied/model1/mask_XMM_z1.fits",
+      "nmap_source": "unit occupancy derived from binary mask",
+      "template_cosmo_number": 0,
+      "template_model_number": 1,
+      "template_realization": 0
+    },
+    "VVDS_z1": {
+      "mode": "gabriela",
+      "geometry_file": "/lustre/work/gmarques/HSC_Y3_analysis_Gabriela/cosmo_varied/model1/E_VVDSsmoothed_z1_0.fits",
+      "mask_file": "/lustre/work/gmarques/HSC_Y3_analysis_Gabriela/cosmo_varied/model1/mask_VVDS_z1.fits",
+      "nmap_source": "unit occupancy derived from binary mask",
+      "template_cosmo_number": 0,
+      "template_model_number": 1,
+      "template_realization": 0
+    },
+    "GAMA09H_z1": {
+      "mode": "gabriela",
+      "geometry_file": "/lustre/work/gmarques/HSC_Y3_analysis_Gabriela/cosmo_varied/model1/E_GAMA09Hsmoothed_z1_0.fits",
+      "mask_file": "/lustre/work/gmarques/HSC_Y3_analysis_Gabriela/cosmo_varied/model1/mask_GAMA09H_z1.fits",
+      "nmap_source": "unit occupancy derived from binary mask",
+      "template_cosmo_number": 0,
+      "template_model_number": 1,
+      "template_realization": 0
+    },
+    "GAMA15H_z1": {
+      "mode": "gabriela",
+      "geometry_file": "/lustre/work/gmarques/HSC_Y3_analysis_Gabriela/cosmo_varied/model1/E_GAMA15Hsmoothed_z1_0.fits",
+      "mask_file": "/lustre/work/gmarques/HSC_Y3_analysis_Gabriela/cosmo_varied/model1/mask_GAMA15H_z1.fits",
+      "nmap_source": "unit occupancy derived from binary mask",
+      "template_cosmo_number": 0,
+      "template_model_number": 1,
+      "template_realization": 0
+    },
+    "WIDE12H_z1": {
+      "mode": "gabriela",
+      "geometry_file": "/lustre/work/gmarques/HSC_Y3_analysis_Gabriela/cosmo_varied/model1/E_WIDE12Hsmoothed_z1_0.fits",
+      "mask_file": "/lustre/work/gmarques/HSC_Y3_analysis_Gabriela/cosmo_varied/model1/mask_WIDE12H_z1.fits",
+      "nmap_source": "unit occupancy derived from binary mask",
+      "template_cosmo_number": 0,
+      "template_model_number": 1,
+      "template_realization": 0
+    },
+    "HECTOMAP_z1": {
+      "mode": "gabriela",
+      "geometry_file": "/lustre/work/gmarques/HSC_Y3_analysis_Gabriela/cosmo_varied/model1/E_HECTOMAPsmoothed_z1_0.fits",
+      "mask_file": "/lustre/work/gmarques/HSC_Y3_analysis_Gabriela/cosmo_varied/model1/mask_HECTOMAP_z1.fits",
+      "nmap_source": "unit occupancy derived from binary mask",
+      "template_cosmo_number": 0,
+      "template_model_number": 1,
+      "template_realization": 0
+    },
+    "XMM_z2": {
+      "mode": "gabriela",
+      "geometry_file": "/lustre/work/gmarques/HSC_Y3_analysis_Gabriela/cosmo_varied/model1/E_XMMsmoothed_z2_0.fits",
+      "mask_file": "/lustre/work/gmarques/HSC_Y3_analysis_Gabriela/cosmo_varied/model1/mask_XMM_z2.fits",
+      "nmap_source": "unit occupancy derived from binary mask",
+      "template_cosmo_number": 0,
+      "template_model_number": 1,
+      "template_realization": 0
+    },
+    "VVDS_z2": {
+      "mode": "gabriela",
+      "geometry_file": "/lustre/work/gmarques/HSC_Y3_analysis_Gabriela/cosmo_varied/model1/E_VVDSsmoothed_z2_0.fits",
+      "mask_file": "/lustre/work/gmarques/HSC_Y3_analysis_Gabriela/cosmo_varied/model1/mask_VVDS_z2.fits",
+      "nmap_source": "unit occupancy derived from binary mask",
+      "template_cosmo_number": 0,
+      "template_model_number": 1,
+      "template_realization": 0
+    },
+    "GAMA09H_z2": {
+      "mode": "gabriela",
+      "geometry_file": "/lustre/work/gmarques/HSC_Y3_analysis_Gabriela/cosmo_varied/model1/E_GAMA09Hsmoothed_z2_0.fits",
+      "mask_file": "/lustre/work/gmarques/HSC_Y3_analysis_Gabriela/cosmo_varied/model1/mask_GAMA09H_z2.fits",
+      "nmap_source": "unit occupancy derived from binary mask",
+      "template_cosmo_number": 0,
+      "template_model_number": 1,
+      "template_realization": 0
+    },
+    "GAMA15H_z2": {
+      "mode": "gabriela",
+      "geometry_file": "/lustre/work/gmarques/HSC_Y3_analysis_Gabriela/cosmo_varied/model1/E_GAMA15Hsmoothed_z2_0.fits",
+      "mask_file": "/lustre/work/gmarques/HSC_Y3_analysis_Gabriela/cosmo_varied/model1/mask_GAMA15H_z2.fits",
+      "nmap_source": "unit occupancy derived from binary mask",
+      "template_cosmo_number": 0,
+      "template_model_number": 1,
+      "template_realization": 0
+    },
+    "WIDE12H_z2": {
+      "mode": "gabriela",
+      "geometry_file": "/lustre/work/gmarques/HSC_Y3_analysis_Gabriela/cosmo_varied/model1/E_WIDE12Hsmoothed_z2_0.fits",
+      "mask_file": "/lustre/work/gmarques/HSC_Y3_analysis_Gabriela/cosmo_varied/model1/mask_WIDE12H_z2.fits",
+      "nmap_source": "unit occupancy derived from binary mask",
+      "template_cosmo_number": 0,
+      "template_model_number": 1,
+      "template_realization": 0
+    },
+    "HECTOMAP_z2": {
+      "mode": "gabriela",
+      "geometry_file": "/lustre/work/gmarques/HSC_Y3_analysis_Gabriela/cosmo_varied/model1/E_HECTOMAPsmoothed_z2_0.fits",
+      "mask_file": "/lustre/work/gmarques/HSC_Y3_analysis_Gabriela/cosmo_varied/model1/mask_HECTOMAP_z2.fits",
+      "nmap_source": "unit occupancy derived from binary mask",
+      "template_cosmo_number": 0,
+      "template_model_number": 1,
+      "template_realization": 0
+    },
+    "XMM_z3": {
+      "mode": "gabriela",
+      "geometry_file": "/lustre/work/gmarques/HSC_Y3_analysis_Gabriela/cosmo_varied/model1/E_XMMsmoothed_z3_0.fits",
+      "mask_file": "/lustre/work/gmarques/HSC_Y3_analysis_Gabriela/cosmo_varied/model1/mask_XMM_z3.fits",
+      "nmap_source": "unit occupancy derived from binary mask",
+      "template_cosmo_number": 0,
+      "template_model_number": 1,
+      "template_realization": 0
+    },
+    "VVDS_z3": {
+      "mode": "gabriela",
+      "geometry_file": "/lustre/work/gmarques/HSC_Y3_analysis_Gabriela/cosmo_varied/model1/E_VVDSsmoothed_z3_0.fits",
+      "mask_file": "/lustre/work/gmarques/HSC_Y3_analysis_Gabriela/cosmo_varied/model1/mask_VVDS_z3.fits",
+      "nmap_source": "unit occupancy derived from binary mask",
+      "template_cosmo_number": 0,
+      "template_model_number": 1,
+      "template_realization": 0
+    },
+    "GAMA09H_z3": {
+      "mode": "gabriela",
+      "geometry_file": "/lustre/work/gmarques/HSC_Y3_analysis_Gabriela/cosmo_varied/model1/E_GAMA09Hsmoothed_z3_0.fits",
+      "mask_file": "/lustre/work/gmarques/HSC_Y3_analysis_Gabriela/cosmo_varied/model1/mask_GAMA09H_z3.fits",
+      "nmap_source": "unit occupancy derived from binary mask",
+      "template_cosmo_number": 0,
+      "template_model_number": 1,
+      "template_realization": 0
+    },
+    "GAMA15H_z3": {
+      "mode": "gabriela",
+      "geometry_file": "/lustre/work/gmarques/HSC_Y3_analysis_Gabriela/cosmo_varied/model1/E_GAMA15Hsmoothed_z3_0.fits",
+      "mask_file": "/lustre/work/gmarques/HSC_Y3_analysis_Gabriela/cosmo_varied/model1/mask_GAMA15H_z3.fits",
+      "nmap_source": "unit occupancy derived from binary mask",
+      "template_cosmo_number": 0,
+      "template_model_number": 1,
+      "template_realization": 0
+    },
+    "WIDE12H_z3": {
+      "mode": "gabriela",
+      "geometry_file": "/lustre/work/gmarques/HSC_Y3_analysis_Gabriela/cosmo_varied/model1/E_WIDE12Hsmoothed_z3_0.fits",
+      "mask_file": "/lustre/work/gmarques/HSC_Y3_analysis_Gabriela/cosmo_varied/model1/mask_WIDE12H_z3.fits",
+      "nmap_source": "unit occupancy derived from binary mask",
+      "template_cosmo_number": 0,
+      "template_model_number": 1,
+      "template_realization": 0
+    },
+    "HECTOMAP_z3": {
+      "mode": "gabriela",
+      "geometry_file": "/lustre/work/gmarques/HSC_Y3_analysis_Gabriela/cosmo_varied/model1/E_HECTOMAPsmoothed_z3_0.fits",
+      "mask_file": "/lustre/work/gmarques/HSC_Y3_analysis_Gabriela/cosmo_varied/model1/mask_HECTOMAP_z3.fits",
+      "nmap_source": "unit occupancy derived from binary mask",
+      "template_cosmo_number": 0,
+      "template_model_number": 1,
+      "template_realization": 0
+    },
+    "XMM_z4": {
+      "mode": "gabriela",
+      "geometry_file": "/lustre/work/gmarques/HSC_Y3_analysis_Gabriela/cosmo_varied/model1/E_XMMsmoothed_z4_0.fits",
+      "mask_file": "/lustre/work/gmarques/HSC_Y3_analysis_Gabriela/cosmo_varied/model1/mask_XMM_z4.fits",
+      "nmap_source": "unit occupancy derived from binary mask",
+      "template_cosmo_number": 0,
+      "template_model_number": 1,
+      "template_realization": 0
+    },
+    "VVDS_z4": {
+      "mode": "gabriela",
+      "geometry_file": "/lustre/work/gmarques/HSC_Y3_analysis_Gabriela/cosmo_varied/model1/E_VVDSsmoothed_z4_0.fits",
+      "mask_file": "/lustre/work/gmarques/HSC_Y3_analysis_Gabriela/cosmo_varied/model1/mask_VVDS_z4.fits",
+      "nmap_source": "unit occupancy derived from binary mask",
+      "template_cosmo_number": 0,
+      "template_model_number": 1,
+      "template_realization": 0
+    },
+    "GAMA09H_z4": {
+      "mode": "gabriela",
+      "geometry_file": "/lustre/work/gmarques/HSC_Y3_analysis_Gabriela/cosmo_varied/model1/E_GAMA09Hsmoothed_z4_0.fits",
+      "mask_file": "/lustre/work/gmarques/HSC_Y3_analysis_Gabriela/cosmo_varied/model1/mask_GAMA09H_z4.fits",
+      "nmap_source": "unit occupancy derived from binary mask",
+      "template_cosmo_number": 0,
+      "template_model_number": 1,
+      "template_realization": 0
+    },
+    "GAMA15H_z4": {
+      "mode": "gabriela",
+      "geometry_file": "/lustre/work/gmarques/HSC_Y3_analysis_Gabriela/cosmo_varied/model1/E_GAMA15Hsmoothed_z4_0.fits",
+      "mask_file": "/lustre/work/gmarques/HSC_Y3_analysis_Gabriela/cosmo_varied/model1/mask_GAMA15H_z4.fits",
+      "nmap_source": "unit occupancy derived from binary mask",
+      "template_cosmo_number": 0,
+      "template_model_number": 1,
+      "template_realization": 0
+    },
+    "WIDE12H_z4": {
+      "mode": "gabriela",
+      "geometry_file": "/lustre/work/gmarques/HSC_Y3_analysis_Gabriela/cosmo_varied/model1/E_WIDE12Hsmoothed_z4_0.fits",
+      "mask_file": "/lustre/work/gmarques/HSC_Y3_analysis_Gabriela/cosmo_varied/model1/mask_WIDE12H_z4.fits",
+      "nmap_source": "unit occupancy derived from binary mask",
+      "template_cosmo_number": 0,
+      "template_model_number": 1,
+      "template_realization": 0
+    },
+    "HECTOMAP_z4": {
+      "mode": "gabriela",
+      "geometry_file": "/lustre/work/gmarques/HSC_Y3_analysis_Gabriela/cosmo_varied/model1/E_HECTOMAPsmoothed_z4_0.fits",
+      "mask_file": "/lustre/work/gmarques/HSC_Y3_analysis_Gabriela/cosmo_varied/model1/mask_HECTOMAP_z4.fits",
+      "nmap_source": "unit occupancy derived from binary mask",
+      "template_cosmo_number": 0,
+      "template_model_number": 1,
+      "template_realization": 0
+    }
+  },
+  "notes": [
+    "Signal-only scalar convergence maps.",
+    "Cutouts use the configured template WCS and mask.",
+    "For Gabriela templates, NMAP is unit occupancy because those files contain no number-density map.",
+    "No shape noise, shear calibration, KS reconstruction, or inpainting is applied."
+  ]
+}

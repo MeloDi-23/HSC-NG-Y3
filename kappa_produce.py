@@ -20,7 +20,7 @@ import multiprocessing as mp
 
 
 name_fields = ['XMM', 'VVDS','GAMA09H', 'GAMA15H', 'WIDE12H', 'HECTOMAP']
-number_patches= [8, 25,23,7,26,13] # of each corresponding field
+number_patches= [8,28,23,7,26,13] # of each corresponding field
 
 tomo_bin = [1, 2, 3, 4]         # tomo_bin, 0 is excluded.
 pixscale_arcmin = 0.5   # 0.5 arcmin → degrees/pixel

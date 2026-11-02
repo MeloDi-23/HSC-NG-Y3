@@ -1,0 +1,90 @@
+{
+  "method": "training-only conditional empirical-marginal Gaussian copula",
+  "n_lf": 17500,
+  "n_hf_train": 1750,
+  "n_hf_validation": 350,
+  "n_hf_test": 400,
+  "n_per_cosmology": 500,
+  "branch_dims": {
+    "C_ell": 18,
+    "peaks": 76,
+    "minima": 76,
+    "pdf": 76,
+    "MFs": 228
+  },
+  "seed": 42,
+  "mean_absolute_shift_in_training_std": 0.0232257267810278,
+  "split": {
+    "train": [
+      3,
+      4,
+      5,
+      7,
+      9,
+      10,
+      15,
+      16,
+      17,
+      18,
+      20,
+      21,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      34,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      49
+    ],
+    "validation": [
+      0,
+      6,
+      11,
+      12,
+      19,
+      22,
+      35
+    ],
+    "test": [
+      1,
+      2,
+      8,
+      13,
+      14,
+      33,
+      36,
+      48
+    ]
+  },
+  "target_order": [
+    "S8",
+    "Omega_m"
+  ],
+  "original_sha256": "35577386f159011453b62dfe40473feb605b29c1481c7ff80e88de68385fa2fc",
+  "source": "/lustre/work/gmarques/HSC_Y3_analysis_Gabriela/stats_cosmo_varied",
+  "realization_order": "shared array indices 0..49 from Gabriela collection; original notebook mapping retained",
+  "limitations": [
+    "Synthetic augmentation at existing training nodes, not independent simulations or new cosmologies.",
+    "Cross-statistic realization identity and parameter mapping follow v4 and require source provenance verification.",
+    "Pooled Gaussian copula approximates dependence; scalar support is preserved, joint histogram/MF constraints need not be.",
+    "All 50 light cones per node are grouped; cones are not assumed independent cosmologies.",
+    "Two-parameter conditional density reflects finite simulation design, not a demonstrated continuous-prior posterior.",
+    "h0 and gravity columns vary; no controlled nuisance-prior marginalization is established."
+  ]
+}

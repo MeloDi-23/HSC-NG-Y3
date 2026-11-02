@@ -1,0 +1,63 @@
+{
+  "cosmology": {
+    "cosmology_id": "fiducial",
+    "Omega_m": 0.31315,
+    "S8": 0.83954,
+    "h": 0.6737,
+    "Omega_b": 0.049,
+    "ns": 0.965,
+    "mnu": 0.06,
+    "tau": 0.054,
+    "w0": -1.0,
+    "wa": 0.0
+  },
+  "derived_sigma8": 0.821723698742396,
+  "realization": 0,
+  "seed": 41000,
+  "simulation": {
+    "nside": 16,
+    "lmax": 32,
+    "zmin": 0.0,
+    "zmax": 4.0,
+    "shell_width_mpc": 1000.0,
+    "correlated_shells": 3,
+    "nonlinear": false,
+    "smoothing_fwhm_arcmin": 0.0,
+    "save_fullsky": true,
+    "save_cutouts": true,
+    "fields": [
+      "XMM"
+    ],
+    "tomographic_bins": [
+      1
+    ]
+  },
+  "versions": {
+    "python": "3.12.12",
+    "numpy": "2.2.6",
+    "astropy": "7.1.1",
+    "healpy": "1.20.1",
+    "camb": "2.0.5",
+    "glass": "2026.4"
+  },
+  "source_nz_sha256": {
+    "1": "b72ad9f725db3de1e70bad73f5e1e12bddc2a716516014d1ef64c2e5c315acee"
+  },
+  "templates": {
+    "XMM_z1": {
+      "mode": "gabriela",
+      "geometry_file": "/lustre/work/gmarques/HSC_Y3_analysis_Gabriela/cosmo_varied/model1/E_XMMsmoothed_z1_0.fits",
+      "mask_file": "/lustre/work/gmarques/HSC_Y3_analysis_Gabriela/cosmo_varied/model1/mask_XMM_z1.fits",
+      "nmap_source": "unit occupancy derived from binary mask",
+      "template_cosmo_number": 0,
+      "template_model_number": 1,
+      "template_realization": 0
+    }
+  },
+  "notes": [
+    "Signal-only scalar convergence maps.",
+    "Cutouts use the configured template WCS and mask.",
+    "For Gabriela templates, NMAP is unit occupancy because those files contain no number-density map.",
+    "No shape noise, shear calibration, KS reconstruction, or inpainting is applied."
+  ]
+}

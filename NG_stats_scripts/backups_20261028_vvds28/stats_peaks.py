@@ -1,0 +1,393 @@
+import os
+os.chdir('/home/hedi/HSCNG/')
+
+import sys
+sys.path.append('/home/hedi/HSCNG/')
+
+import multiprocessing as mp
+import numpy as np
+from astropy.io import fits
+from astropy.wcs import WCS
+from hsc_y3_utils import map_utils, stats_code
+import warnings
+from astropy.wcs import FITSFixedWarning
+from pathlib import Path
+
+warnings.filterwarnings('ignore', category=FITSFixedWarning)
+
+
+# ============================================================
+# Settings
+# ============================================================
+
+saved_dir = Path('/home/hedi/HSCNG/peaks/mock_results')
+saved_dir.mkdir(parents=True, exist_ok=True)
+
+Npro = 16
+
+name_fields = [
+    'XMM',
+    'VVDS',
+    'GAMA09H',
+    'GAMA15H',
+    'WIDE12H',
+    'HECTOMAP'
+]
+
+number_patches = [8, 25, 23, 7, 26, 13]
+
+pixscale_arcmin = 0.5
+smoothing_kernel_size = 5.0  # arcmin
+
+binning = np.linspace(-5, 5, 20)
+
+procedure = 'smooth g-inpainting-KSI-masking'
+
+
+# ============================================================
+# Map loading
+# ============================================================
+
+def load_map_info(file):
+    with fits.open(file) as map_fits:
+
+        map_info = {}
+
+        names = [
+            'G1',
+            'G2',
+            'KAPPA',
+            'KAPPA_I',
+            'WEIGHT_MASK',
+            'NMAP'
+        ]
+
+        keys = [
+            'g1',
+            'g2',
+            'kappa',
+            'kappa_i',
+            'weight_mask',
+            'nmap'
+        ]
+
+        for name, key in zip(names, keys):
+            map_info[key] = map_fits[name].data
+
+        map_info['wcs'] = WCS(
+            map_fits[0].header
+        )
+
+    return map_info
+
+
+def load_map_info_mock(
+    field,
+    tomo_bin,
+    procedure,
+    cosmo_number
+):
+    """
+    Load all 50 realizations.
+
+    Ordering:
+        0-24  : phase a, cone 1-25
+        25-49 : phase b, cone 1-25
+    """
+
+    maps = []
+
+    for phase in ['a', 'b']:
+
+        for cone in range(1, 26):
+
+            file_name = (
+                f"maps/mock/"
+                f"node{cosmo_number:02d}_{phase}/"
+                f"cone{cone}/"
+                f"kappa_map_mock_{field}_"
+                f"z{tomo_bin}_{procedure}.fits"
+            )
+            # maps/mock/node{cosmo_number:02d}_a/cone{i+1}/kappa_map_mock_{field}_z{tomo_bin}_{procedure}.fits
+
+            maps.append(
+                load_map_info(file_name)
+            )
+
+    if len(maps) != 50:
+        raise RuntimeError(
+            f"Expected 50 maps, got {len(maps)} "
+            f"for model={cosmo_number}, "
+            f"field={field}, tomo={tomo_bin}"
+        )
+
+    return maps
+
+
+# ============================================================
+# Peak/minimum calculation
+# ============================================================
+
+def peaks_minimums(
+    masked_kappa,
+    mask,
+    bins
+):
+
+    count_p, edge = (
+        stats_code.peaks_histogram(
+            masked_kappa,
+            mask=mask,
+            bins=bins
+        )
+    )
+
+    count_m, edge = (
+        stats_code.peaks_histogram(
+            -masked_kappa,
+            mask=mask,
+            bins=bins
+        )
+    )
+
+    return edge, count_p, count_m
+
+
+def compute_pm_mock(
+    procedure,
+    field,
+    tomo_bin,
+    binning,
+    cosmo
+):
+    """
+    Compute peaks and minimums separately
+    for all 50 realizations.
+
+    Returns
+    -------
+    x : ndarray
+        Histogram coordinate.
+
+    peaks : ndarray
+        Shape (50, N_bin)
+
+    minimums : ndarray
+        Shape (50, N_bin)
+    """
+
+    map_info_mock = load_map_info_mock(
+        field,
+        tomo_bin,
+        procedure,
+        cosmo
+    )
+
+    map_info = map_info_mock[0]
+
+    flatobj = map_utils.FlatClass(
+        map_info['wcs'],
+        map_info['kappa'].shape[1],
+        map_info['kappa'].shape[0]
+    )
+    kappa_mocks = [
+            np.array(mock['kappa']) for mock in map_info_mock
+        ]
+    del map_info_mock
+
+    # --------------------------------------------------------
+    # Smooth all 50 maps
+    # --------------------------------------------------------
+
+    smoothing_pix = (
+        smoothing_kernel_size / pixscale_arcmin
+    )
+
+    kappa_smoothed_list = []
+
+    for mock in kappa_mocks:
+
+        kappa_smoothed = flatobj.smooth_G(
+            mock,
+            smoothing_pix
+        )
+
+        kappa_smoothed_list.append(
+            kappa_smoothed
+        )
+
+    kappa_mock_array = np.asarray(
+        kappa_smoothed_list
+    )
+
+    # --------------------------------------------------------
+    # Construct mask
+    # --------------------------------------------------------
+
+    original_mask = (
+        map_info['weight_mask'] > 0
+    )
+
+    Npatch = number_patches[
+        name_fields.index(field)
+    ]
+
+    dats = [
+        fits.getdata(
+            f'data/real/'
+            f'hscy3_shape_chopped_{field}_{i}.fits'
+        )
+        for i in range(Npatch)
+    ]
+
+    dat = np.concatenate(dats)
+
+    dat = dat[
+        dat['hsc_y3_zbin'] == tomo_bin
+    ]
+
+    smoothed_weight = flatobj.smooth_G(
+        map_info['weight_mask'],
+        smoothing_pix
+    )
+
+    mask_criterion_loose = (
+        (
+            smoothed_weight
+            >
+            dat[
+                'i_hsmshaperegauss_derived_weight'
+            ].min() * 0.8
+        )
+        & original_mask
+    )
+
+    # --------------------------------------------------------
+    # Normalize
+    # --------------------------------------------------------
+
+    sigma = kappa_mock_array[
+        :, mask_criterion_loose
+    ].std()
+
+    kappa_sigma_ratio_mock = (
+        kappa_mock_array / sigma
+    )
+
+    # --------------------------------------------------------
+    # Calculate peaks/minimums realization by realization
+    # --------------------------------------------------------
+
+    peaks = []
+    minimums = []
+
+    x = None
+
+    for realization_id, kappa in enumerate(
+        kappa_sigma_ratio_mock
+    ):
+
+        x, y_p, y_m = peaks_minimums(
+            kappa,
+            mask_criterion_loose,
+            bins=binning
+        )
+
+        if (
+            np.isnan(y_p).any()
+            or np.isnan(y_m).any()
+        ):
+
+            print(
+                f"WARNING: NaN found: "
+                f"model={cosmo}, "
+                f"tomo={tomo_bin}, "
+                f"field={field}, "
+                f"realization={realization_id}"
+            )
+
+        peaks.append(y_p)
+        minimums.append(y_m)
+
+    peaks = np.asarray(peaks)
+    minimums = np.asarray(minimums)
+
+    assert peaks.shape[0] == 50
+    assert minimums.shape[0] == 50
+
+    return x, peaks, minimums
+
+
+# ============================================================
+# Compute one cosmology/tomo and save each field
+# ============================================================
+
+def process_cosmology(args):
+
+    cosmo_id, tomo = args
+
+    for field in name_fields:
+        files = [
+            saved_dir / f'model{cosmo_id}_peaks_z{tomo}_{field}.npy',
+            saved_dir / f'model{cosmo_id}_minimums_z{tomo}_{field}.npy'
+        ]
+        if all(f.exists() for f in files):
+            continue
+
+        x, peaks, minimums = compute_pm_mock(
+            procedure=procedure,
+            field=field,
+            tomo_bin=tomo,
+            binning=binning,
+            cosmo=cosmo_id
+        )
+
+        np.save(
+            saved_dir /
+            f'model{cosmo_id}_peaks_z{tomo}_{field}.npy',
+            peaks
+        )
+
+        np.save(
+            saved_dir /
+            f'model{cosmo_id}_minimums_z{tomo}_{field}.npy',
+            minimums
+        )
+
+    return cosmo_id, tomo
+
+
+# ============================================================
+# Run
+# ============================================================
+
+if __name__ == '__main__':
+
+    for tomo in [1, 2, 3, 4]:
+
+        print(
+            f'\n===== Peaks/minimums: '
+            f'tomographic bin {tomo} ====='
+        )
+
+        jobs = [
+            (cosmo_id, tomo)
+            for cosmo_id in range(50)
+        ]
+
+        with mp.Pool(processes=Npro) as pool:
+
+            for i, (cosmo_id, finished_tomo) in enumerate(
+                pool.imap_unordered(
+                    process_cosmology,
+                    jobs
+                ),
+                start=1
+            ):
+
+                print(
+                    f'z{finished_tomo}: '
+                    f'{i}/50 cosmologies finished '
+                    f'(model {cosmo_id})',
+                    flush=True
+                )
